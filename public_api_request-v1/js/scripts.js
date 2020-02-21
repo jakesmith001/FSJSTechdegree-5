@@ -14,7 +14,9 @@ async function fetchUsers(url){
     const peopleJSON = await people.json()
 
     randomUsers = peopleJSON.results.map(res => {
-        
+        const dobRegex = /\d\d\d\d-\d\d-\d\d/g;
+        let dob = dobRegex.exec(res.dob.date);
+
         let person = {
             name: res.name.first + ' ' + res.name.last,
             email: res.email,
@@ -25,10 +27,10 @@ async function fetchUsers(url){
                 postcode: res.location.postcode,
             },
             phone: res.phone,
-            birthday: res.dob.date,
+            birthday: dob,
             pictureURL: res.picture.large,
         }
-        console.log(peopleJSON)
+        // console.log(peopleJSON)
         return person
     });
 }
@@ -51,12 +53,19 @@ function createGallery(){
             galleryClass.appendChild(card)    
         });
     })
+    .catch(err => {
+        let errMsg = document.createElement('h3');
+        errMsg.innerHTML = `Something went wrong. Please try reloading the page.`;
+        console.log(err);
+
+        galleryClass.appendChild(errMsg);
+    })
 }
 
 createGallery();
 
 //Gallery card click event handler
-document.querySelector('.gallery').addEventListener('click', e => {
+galleryClass.addEventListener('click', e => {
     //console.log(e)
 
     for(let i = 0; i < randomUsers.length; i++){
@@ -75,7 +84,7 @@ document.querySelector('.gallery').addEventListener('click', e => {
                         <p class="modal-text cap">${randomUsers[i].location.city}</p>
                         <hr>
                         <p class="modal-text">${randomUsers[i].phone}</p>
-                        <p class="modal-text">123 Portland Ave., Portland, OR 97204 ${randomUsers[i].location.street + ', ' + randomUsers[i].location.city + ', ' + randomUsers[i].location.state + ' ' + randomUsers[i].location.postcode}</p>
+                        <p class="modal-text">${randomUsers[i].location.street + ', ' + randomUsers[i].location.city + ', ' + randomUsers[i].location.state + ' ' + randomUsers[i].location.postcode}</p>
                         <p class="modal-text">${randomUsers[i].birthday}</p>
                     </div>
                 </div>`;
@@ -83,5 +92,10 @@ document.querySelector('.gallery').addEventListener('click', e => {
             break
         }
     }
-    
+    document.querySelector('.modal-close-btn').addEventListener('click', e => {
+        let modal = document.querySelector('.modal-container');
+        modal.remove();
+    })
+
 })
+
